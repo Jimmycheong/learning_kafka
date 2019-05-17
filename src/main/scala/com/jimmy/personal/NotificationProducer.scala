@@ -6,7 +6,7 @@ import java.util.Properties
 case class Notification(sender: String, message: String)
 
 object NotificationProducer {
-  def apply(topicName: String, bootstrapServers: String): KafkaProducer[String, String] = {
+  def apply[K,V] (topicName: String, bootstrapServers: String): KafkaProducer[K,V]= {
 
     val properties = new Properties()
     properties.put("bootstrap.servers", bootstrapServers)
@@ -18,8 +18,7 @@ object NotificationProducer {
     properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
 
-    new KafkaProducer[String, String](properties)
+    new KafkaProducer[K,V](properties)
   }
-
 
 }

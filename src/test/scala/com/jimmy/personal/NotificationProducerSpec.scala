@@ -3,42 +3,36 @@ package com.jimmy.personal
 import java.time.Duration
 import java.util
 
+import io.circe.generic.auto._
+import io.circe.parser._
+import io.circe.syntax._
+import net.manub.embeddedkafka.ops.ProducerOps
 import net.manub.embeddedkafka.{Consumers, EmbeddedKafka, EmbeddedKafkaConfig}
 import org.apache.kafka.clients.consumer.{ConsumerRecords, KafkaConsumer}
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
-import org.apache.kafka.common.serialization.{Deserializer, StringDeserializer, StringSerializer}
+import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
 import org.scalatest.FlatSpec
 
-class NotificationProducerSpec extends FlatSpec with EmbeddedKafka with Consumers {
+
+class NotificationProducerSpec extends FlatSpec with EmbeddedKafka with ProducerOps[EmbeddedKafkaConfig] with Consumers {
 
   "NotificationProducer" should "write messages to Kafka" in {
 
     val embeddedKafkaConfig = EmbeddedKafkaConfig(12345)
+    val topicName = "someTopic"
 
-    withRunningKafkaOnFoundPort(embeddedKafkaConfig) { implicit embeddedKafkaConfig =>
+    withRunningKafkaOnFoundPort(embeddedKafkaConfig) { implicit embeddedKafkaConfig: EmbeddedKafkaConfig => // the config is implicit here
+      implicit val serializer: StringSerializer = new StringSerializer
 
-      println("Step 1")
-      val topicName = "someTopic"
-
-      val bootstrapServers = s"localhost:${embeddedKafkaConfig.kafkaPort}"
-      val notificationProducer: KafkaProducer[String, String] = NotificationProducer(topicName, bootstrapServers)
-
-      val records = (1 to 10).map(currentNumber =>
-        new ProducerRecord[String, String](topicName, currentNumber.toString, s"value_$currentNumber")
-      )
-
-      println("Step 2")
-      records.foreach { record =>
-        println(s"Record: ${record.value()} sent")
-        notificationProducer.send(record)
+      println("Step 1: Pushing case classes")
+      val notifications = (1 to 10).map { i =>
+        Notification("numberOfEmails", s"$i email in inbox").asJson.noSpaces
       }
 
-      notificationProducer.close()
-      implicit val stringDeserializer = new StringDeserializer
+      notifications.foreach { notification =>
+        publishToKafka(topicName, notification)
+      }
 
-      println("Step 3")
-
-
+      implicit val stringDeserializer: StringDeserializer = new StringDeserializer
       withConsumer { consumer: KafkaConsumer[String, String] =>
 
         consumer.subscribe(util.Arrays.asList(topicName))
@@ -47,16 +41,16 @@ class NotificationProducerSpec extends FlatSpec with EmbeddedKafka with Consumer
         val records: ConsumerRecords[String, String] = consumer.poll(duration)
 
         records.forEach { record =>
-          println(
-            s"""
-               | Key: ${record.key}
-               | Value: ${record.value}
-            """.stripMargin)
+
+          decode[Notification](record.value) match {
+            case Right(value) => println(s"Sender: ${value.sender}, Message: ${value.message}")
+          }
         }
       }
+      println("Consumption complete")
+
 
     }
-
 
   }
 
