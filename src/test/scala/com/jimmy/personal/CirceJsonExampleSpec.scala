@@ -17,7 +17,7 @@ class NotificationProducerSpec extends FlatSpec with EmbeddedKafka with Producer
 
   "NotificationProducer" should "write messages to Kafka" in {
 
-    val embeddedKafkaConfig = EmbeddedKafkaConfig(12345)
+    val embeddedKafkaConfig = EmbeddedKafkaConfig()
     val topicName = "someTopic"
 
     withRunningKafkaOnFoundPort(embeddedKafkaConfig) { implicit embeddedKafkaConfig: EmbeddedKafkaConfig => // the config is implicit here

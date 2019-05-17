@@ -29,11 +29,20 @@ class KafkaAvroSpec extends FlatSpec with EmbeddedKafka with ProducerOps[Embedde
     implicit val avroSerializer: Serializer[Person] = avroBinarySchemaIdSerializer(schemaRegistryLocation, isKey = false)
     implicit val avroDeserializer: Deserializer[Person] =  avroBinarySchemaIdDeserializer(schemaRegistryLocation, isKey = false)
 
-    implicit val config: EmbeddedKafkaConfig = EmbeddedKafkaConfig()
+    implicit val config: EmbeddedKafkaConfig = EmbeddedKafkaConfig(kafkaPort = kafkaPort, schemaRegistryPort = schemaRegistryPort)
+
+    val people = Seq(
+      Person("jimmy", 180),
+      Person("david", 178),
+      Person("sam", 176),
+      Person("peter", 174),
+      Person("alvin", 172)
+    )
 
     withRunningKafka {
-      val message = Person("jimmy", 180)
-      publishToKafka(topicName, message)
+      people.foreach { person =>
+        publishToKafka(topicName, person)
+      }
 
       withConsumer { consumer: KafkaConsumer[Person, Person] =>
         consumer.subscribe(util.Arrays.asList(topicName))
@@ -45,10 +54,7 @@ class KafkaAvroSpec extends FlatSpec with EmbeddedKafka with ProducerOps[Embedde
           val recordValue = record.value
           println(s"name: ${recordValue.name}; height: ${recordValue.height}")
         }
-
       }
-
-
     }
 
   }

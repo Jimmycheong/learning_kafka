@@ -4,6 +4,8 @@ version := "0.1"
 
 scalaVersion := "2.12.8"
 
+parallelExecution in ThisBuild := false // To not run tests in parallel
+
 resolvers ++= Seq(
   "confluent" at "https://packages.confluent.io/maven/",
   Resolver.bintrayRepo("ovotech", "maven")
