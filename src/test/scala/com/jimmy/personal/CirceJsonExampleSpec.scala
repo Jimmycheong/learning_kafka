@@ -12,10 +12,11 @@ import org.apache.kafka.clients.consumer.{ConsumerRecords, KafkaConsumer}
 import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
 import org.scalatest.FlatSpec
 
+case class Notification(sender: String, message: String)
 
-class NotificationProducerSpec extends FlatSpec with EmbeddedKafka with ProducerOps[EmbeddedKafkaConfig] with Consumers {
+class CirceJsonExampleSpec extends FlatSpec with EmbeddedKafka with ProducerOps[EmbeddedKafkaConfig] with Consumers {
 
-  "NotificationProducer" should "write messages to Kafka" in {
+  "This example" should "write and read messages using the circe to transform to Kafka" in {
 
     val embeddedKafkaConfig = EmbeddedKafkaConfig()
     val topicName = "someTopic"

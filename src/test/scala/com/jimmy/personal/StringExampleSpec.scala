@@ -9,9 +9,9 @@ import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.kafka.common.serialization.{Deserializer, StringDeserializer, StringSerializer}
 import org.scalatest.FlatSpec
 
-class BasicProducerSpec extends FlatSpec with EmbeddedKafka with Consumers {
+class StringExampleSpec extends FlatSpec with EmbeddedKafka with Consumers {
 
-  "NotificationProducer" should "write messages to Kafka" in {
+  "This test" should "write and read string messages to Kafka" in {
 
     val kafkaPort = 12345
     val topicName = "someTopic"

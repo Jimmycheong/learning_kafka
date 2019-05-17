@@ -17,7 +17,7 @@ case class Person(name: String, height: Int)
 
 class KafkaAvroSpec extends FlatSpec with EmbeddedKafka with ProducerOps[EmbeddedKafkaConfig] with Consumers {
 
-  "Something" should "" in {
+  "This example" should "write and read messages using the avro schema" in {
 
     val topicName = "someTopic"
     val kafkaPort = 12345
