@@ -49,7 +49,6 @@ class NotificationProducerSpec extends FlatSpec with EmbeddedKafka with Producer
       }
       println("Consumption complete")
 
-
     }
 
   }
